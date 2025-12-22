@@ -1,16 +1,33 @@
-FROM nginx:alpine
+# ---------- STAGE 1: build ----------
+    FROM node:20-alpine AS build
 
-# Удаляем дефолтную страницу
-RUN rm -rf /usr/share/nginx/html/*
-
-# Копируем билд React в html
-COPY dist/ /usr/share/nginx/html/
-
-# Копируем кастомный конфиг Nginx для SPA
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Экспонируем порт 80
-EXPOSE 80
-
-# Запускаем Nginx в фоне
-CMD ["nginx", "-g", "daemon off;"]
+    WORKDIR /app
+    
+    # Копируем зависимости
+    COPY package*.json ./
+    
+    RUN npm config set registry https://registry.npmjs.org/ \
+    && npm config set fetch-retries 5 \
+    && npm install
+    
+    # Копируем исходники
+    COPY . .
+    
+    # Собираем React
+    RUN npm run build
+    
+    
+    # ---------- STAGE 2: nginx ----------
+    FROM nginx:alpine
+    
+    # Удаляем дефолтную страницу
+    RUN rm -rf /usr/share/nginx/html/*
+    
+    # Копируем результат сборки
+    COPY --from=build /app/dist /usr/share/nginx/html
+    
+    # SPA fallback
+    COPY nginx.conf /etc/nginx/conf.d/default.conf
+    
+    EXPOSE 80
+    CMD ["nginx", "-g", "daemon off;"]
