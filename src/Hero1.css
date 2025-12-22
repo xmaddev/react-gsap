@@ -1,0 +1,89 @@
+:root{
+    --bg:#000; --ink:#fff;
+    --orange:#FF9800; --purple:#8200FA;
+  
+    /* Layout */
+    --hero-min:560px; --hero-max:900px;
+    --panel-w:48.5%;
+    --container-max:989px;
+    --content-gap:8px;
+    --seam-w:clamp(24px,6vw,140px);
+    --nudge-x: 10%;
+  
+    /* We’ll respect your cropped image by anchoring left/centre */
+    --img-pos: left center;
+  }
+  
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif}
+  
+  /* Two concrete columns: left text / right image panel */
+  .hero{
+    position:relative;
+    display:grid;
+    grid-template-columns: calc(100% - var(--panel-w)) var(--panel-w);
+    align-items:center;
+    min-height:clamp(var(--hero-min),80vh,var(--hero-max));
+    padding-block:clamp(24px,4vw,40px);
+    padding-inline-start:clamp(20px,3vw,32px);
+    overflow:hidden;
+    background:#000;
+  }
+  
+  /* Seam feather (black -> transparent into the image) */
+  .hero::before{
+    content:"";
+    position:absolute;
+    top:0;
+    left:calc(100% - var(--panel-w));
+    height:100%;
+    width:var(--seam-w);
+    pointer-events:none;
+    z-index:1;
+    background:linear-gradient(to right,#000 0%,rgba(0,0,0,.75) 50%,rgba(0,0,0,0) 100%);
+  }
+  
+  .hero__inner{
+    grid-column:1 / 2;
+    justify-self:end;
+    max-width:var(--container-max);
+    padding-right:var(--content-gap);
+    transform: translateX(var(--nudge-x));
+    z-index:2;
+  }
+  
+  .hero__h1{
+    margin:0;font-weight:700;letter-spacing:-.01em;line-height:1.25;
+    font-size:clamp(2rem,3.5vw + .5rem,3.2rem);
+  }
+  .hero__preface{color:#fff}
+  
+  /* Rotator */
+  .rotator{position:relative;display:inline-grid;align-items:center;min-height:1em}
+  .rotator__item{
+    background:linear-gradient(90deg,var(--orange),var(--purple));
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    white-space:nowrap;display:inline-block;will-change:transform,opacity;
+    opacity:1;transform:translateY(0);
+    transition:opacity .9s cubic-bezier(.66,0,.24,1),transform .9s cubic-bezier(.66,0,.24,1);
+  }
+  .rotator--out .rotator__item{opacity:0;transform:translateY(-6px)}
+  .rotator--in  .rotator__item{opacity:1;transform:translateY(0)}
+  
+  .hero__panel{
+    grid-column:2 / 3;
+    position:relative;
+    height:100%;
+    background-image:url("https://images.squarespace-cdn.com/content/v1/675046da59c5d57a03417446/6171030c-f641-4c46-8564-f78f7205b7a8/3P-Goals-Achieved-at-Peaks-Challenge.jpg?format=2500w");
+    background-size: cover;           /* fill the panel */
+    background-position: var(--img-pos);
+    z-index:0;
+  }
+  
+  /* SR-only helper (if present in HTML) */
+  .sr-only{
+    position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;
+  }
+  
+  @media (prefers-reduced-motion: reduce){ .rotator__item{ transition:none } }
+  
